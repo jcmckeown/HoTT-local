@@ -3,7 +3,7 @@ HoTT-local
 
 This is a version of the main HoTT repository 
 
-    https://github.com/HoTT/HoTT
+  https://github.com/HoTT/HoTT
  
 tweaked to compile in Coq v. 8.4(β).  The most salient nifty feature
 (bug) in the latter include automatic η-conversion (so the Funext lemmata may not need to talk about eta,
@@ -16,4 +16,4 @@ equiv family of equivalence types.
 
 I hope it may be useful; if not, I hope it's not too ugly; if not... no need to tell me.  For more, see
 
-    https://homotopytypetheory.org
+  https://homotopytypetheory.org
