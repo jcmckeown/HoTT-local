@@ -29,6 +29,21 @@ Lemma composescommute { A B C D : Type } (f : A -> B) (g : B -> C) (h : C -> D) 
  auto.
 Defined.
 
+Notation " f *~ p " := (map (compose f) p) (at level 76, right associativity).
+Notation " p ~| g " := (map (esopmoc g) p) (at level 74, left associativity).
+
+Lemma push_or_pull { A B C D : Type } (f : C -> D) (g h : B -> C) (k : A -> B)
+ (p : g == h) :
+ (( f *~ p ) ~| k) == (f *~ ( p ~| k )).
+ undo_compose_map.
+Defined.
+
+Ltac push_pull_assoc :=
+ match goal with
+ | |- context cxt[(?f *~ ?p) ~| ?g] =>
+  let mid := context cxt[ f *~ ( p ~| g) ] in
+  path_using mid push_or_pull end.
+
 Lemma comp_nat { X Y : Type } : forall f g : X -> Y, 
     forall x y : X,
     forall p : x == y,
@@ -72,13 +87,11 @@ Section PHIso.
         Defined.
         
         Lemma sect_absb : forall (X : Type) (x : X -> Z),
-          map (esopmoc (g o h o x)) r == map (compose (g o h) o (esopmoc x)) r.
+          (r ~| (g o h o x)) == ((g o h) *~ r ~| x).
         Proof.
             intros.
-            apply @concat_cancel_right with (r := map (esopmoc x) r).
-            assert (H := sect_nat _ (g o h o x) x (map (esopmoc x) r) ).
-            apply (concat H).
-            undo_compose_map.
+            apply @concat_cancel_right with (r := r ~| x).
+            apply sect_nat.
         Defined.
     
     End Naturalities.
@@ -90,21 +103,19 @@ Section PHIso.
         Lemma p_iso_to_p_equiv : p_equiv.
         Proof.
             remember H as HH.
-            destruct HH as [ h [ f r [ g s ]]].
+            destruct HH as [ h [ f R [ g S ]]].
             unfold p_sect in *.
             exists h.
-            exists (f ; r).
-            set ( g_is_h := !  map (esopmoc g) r @ map (compose h) s: g == h).
+            exists (f ; R).
+            set ( g_is_h := ! ( R ~| g ) @ (h *~ S) : g == h).
             intro.
-            destruct y as [ f' r' ].
-            apply total_path with (! map (esopmoc f') s 
-                              @ map (compose f) (map (esopmoc f') g_is_h)
-                               @ map (compose f) r' ).
+            destruct y as [ f' R' ].
+            apply total_path with (! (S ~| f')
+                              @ ( f *~ g_is_h ~| f' )
+                               @ (f *~ R') ).
             simpl.
             refine ((trans_paths _ _ (compose h) (fun _ : B -> A => idmap B) _ _
-                                 (! map (esopmoc f') s 
-                                   @ map (compose f) (map (esopmoc f') g_is_h)
-                                   @ map (compose f) r' ) _) @ _). 
+                          (! ( S ~| f') @ ( f *~ g_is_h ~| f' ) @ (f *~ R')) _) @ _). 
             cancel_units.
             do_concat_map.
             do_opposite_map.
@@ -116,20 +127,18 @@ Section PHIso.
             associate_right.
             moveleft_onleft.
             do_opposite_map.
-            path_via ( map (esopmoc ( h o f o g o f')) r @
-                         map (compose h) (map (esopmoc f') s) @ r' ).
+            path_via ( ( R ~| h o f o g o f' ) @ ( h *~ S ~| f' ) @ R' ).
             associate_left.
-            refine ( _ @ ! (sect_absb _ _ _ _ r _ (g o f') ) @ _ ).
+            refine ( _ @ ! (sect_absb _ _ _ _ R _ (g o f') ) @ _ ).
             undo_compose_map. auto.
             undo_concat_map.
             associate_left.
-            refine ( _ @ sect_nat _ _ _ _ r _ _ _ (map (esopmoc f') (map (compose h) s) @ r') @ _ ).
+            refine ( _ @ sect_nat _ _ _ _ R _ _ _ (( h *~ S ~| f') @ R') @ _ ).
             do_concat_map.
             undo_compose_map.
             unfold compose, esopmoc. associate_right.
             do_concat_map.
             undo_compose_map.
-            unfold esopmoc, idmap.
             apply idmap_map.
         Defined.
     
