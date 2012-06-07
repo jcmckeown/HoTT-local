@@ -38,11 +38,43 @@ Lemma push_or_pull { A B C D : Type } (f : C -> D) (g h : B -> C) (k : A -> B)
  undo_compose_map.
 Defined.
 
-Ltac push_pull_assoc :=
- match goal with
- | |- context cxt[(?f *~ ?p) ~| ?g] =>
+Ltac push_pull_assoc_in s :=
+ match s with
+ | context cxt[(?f *~ ?p) ~| ?g] =>
   let mid := context cxt[ f *~ ( p ~| g) ] in
   path_using mid push_or_pull end.
+
+Ltac push_pull_assoc := 
+repeat progress (
+ match goal with
+  |- ?s == ?t => first [ push_pull_assoc_in s | push_pull_assoc_in t ]
+  end
+ ).
+
+Ltac undo_compose_push_in s :=
+ match s with
+ | context cxt[ ?f *~ ?g *~ ?p ] =>
+  let mid := context cxt[ f o g *~ p ] in
+  path_via mid ; try ( apply opposite; apply_compose_map ) end.
+
+Ltac undo_compose_push :=
+ repeat progress (
+ match goal with
+ |- ?s == ?t => first [ undo_compose_push_in s | undo_compose_push_in t ]
+  end ).
+
+Ltac undo_compose_pull_in s :=
+ match s with
+ | context cxt[ ?p ~| ?f ~| ?g ] =>
+  let mid := context cxt[ p ~| f o g ] in
+  path_via mid ; try apply_compose_map
+ end.
+
+Ltac undo_compose_pull :=
+ repeat progress (
+ match goal with
+ |- ?s == ?t => first [ undo_compose_pull_in s | undo_compose_pull_in t ]
+  end ).
 
 Lemma comp_nat { X Y : Type } : forall f g : X -> Y, 
     forall x y : X,
@@ -74,7 +106,7 @@ Section PHIso.
         Hypotheses ( Y Z : Type) (g : Y -> Z) (h : Z -> Y) (r : p_sect g h).
         
         Lemma sect_nat : forall (X : Type) ( x y : X -> Z ) ( p : x == y ),
-          map (esopmoc x) r @ p == map (compose (g o h)) p @ map (esopmoc y) r.
+          (r ~| x) @ p == ((g o h) *~ p) @ ( r ~| y ).
         Proof.
             induction p.
             cancel_units.
@@ -127,19 +159,16 @@ Section PHIso.
             associate_right.
             moveleft_onleft.
             do_opposite_map.
-            path_via ( ( R ~| h o f o g o f' ) @ ( h *~ S ~| f' ) @ R' ).
-            associate_left.
-            refine ( _ @ ! (sect_absb _ _ _ _ R _ (g o f') ) @ _ ).
-            undo_compose_map. auto.
-            undo_concat_map.
-            associate_left.
+            path_via ( ( R ~| h o f o g o f' ) @ (( h *~ S ~| f' ) @ R') ).
+            undo_compose_push. undo_compose_map.
+            undo_compose_pull. undo_compose_map.
+            apply opposite; apply @sect_absb with (x := g o f').
+            path_via ( (h o f *~ ( (h *~ S ~| f') @ R')) @ R ).
             refine ( _ @ sect_nat _ _ _ _ R _ _ _ (( h *~ S ~| f') @ R') @ _ ).
+            auto. path_simplify. apply idmap_map.
             do_concat_map.
+            associate_left.
             undo_compose_map.
-            unfold compose, esopmoc. associate_right.
-            do_concat_map.
-            undo_compose_map.
-            apply idmap_map.
         Defined.
     
     End AssumePIso.
