@@ -1,4 +1,4 @@
-Add LoadPath "~/HoTT/HoTT/Coq".
+Add LoadPath "../Coq".
 
 Require Import Homotopy CWComplexes CylMaps.
 
@@ -135,7 +135,8 @@ Section AUsefulEquivalence.
    Defined.
 
  End OTToMS.
- 
+
+(* 
  Lemma MT_OT_equiv : (MT MS) <~> (MT OneTrunc).
    exists include_again.
    apply hequiv_is_equiv with include_from.
@@ -144,3 +145,6 @@ Section AUsefulEquivalence.
    unfold sect_data.
     unfold compose.
     
+*)
+
+End AUsefulEquivalence.

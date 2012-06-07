@@ -1,4 +1,4 @@
-Add LoadPath "~/HoTT/HoTT/Coq".
+Add LoadPath "../Coq".
 
 Require Import Homotopy CWComplexes.
 

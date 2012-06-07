@@ -1,5 +1,4 @@
-Add LoadPath "~/HoTT-local/Coq".
-Add LoadPath "~/HoTT-local/local".
+Add LoadPath "../Coq".
 
 Require Import Homotopy.
 

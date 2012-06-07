@@ -1,4 +1,4 @@
-Add LoadPath "~/HoTT/HoTT/Coq".
+Add LoadPath "../Coq".
 
 Require Import Contractible.
 
@@ -83,7 +83,7 @@ Lemma comp_nat { X Y : Type } : forall f g : X -> Y,
     map f p @ happly q y == happly q x @ map g p.
     Proof.
         path_induction.
-    Defined.
+Defined.
 
 Section PHIso.
 

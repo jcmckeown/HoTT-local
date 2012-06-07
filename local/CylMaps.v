@@ -1,5 +1,4 @@
-Add LoadPath "~/HoTT/HoTT/Coq".
-Add LoadPath "~/HoTT/HoTT/local".
+Add LoadPath "../Coq".
 
 Require Import Homotopy CWComplexes PushoutNonDep.
 
