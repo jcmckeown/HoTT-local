@@ -4,9 +4,23 @@ Require Import Homotopy.
 
 Close Scope nat_scope.
 
-Definition IsEmpty ( X : Type ) : Type := X -> False.
 
+(** You can't squeeze anything into nothing *)
+Definition IsEmpty ( X : Type ) : Type := X -> False. 
+
+(** If you can't fit into nothing, you must have something, though perhaps
+  we can't say what. *)
 Definition is_inhab (X : Type ) := IsEmpty (IsEmpty X).
+
+(** If we can, though, then vice-versa *)
+Lemma inhab { X } : X -> is_inhab X.
+  intros x f.
+  contradict (f x).
+Defined.
+
+(** There's at most one way to not fit in nothing. We seem to need funext,
+    but perhaps we should simply posit it? Do we not assume something
+    equivalent in eta or some such? *)
 
 Lemma is_conn_inhab { X : Type } : forall a b : is_inhab X, 
  a == b.
@@ -16,6 +30,8 @@ Lemma is_conn_inhab { X : Type } : forall a b : is_inhab X,
  contradict (a x).
 Defined.
 
+(** wrapping the previous result in fancier terminology *)
+
 Lemma if_inhab_then_inhab_contr { X : Type } :
  forall a : is_inhab X,
   is_contr (is_inhab X).
@@ -24,6 +40,8 @@ Lemma if_inhab_then_inhab_contr { X : Type } :
   intros.
   apply is_conn_inhab.
 Defined.
+
+(** And so *)
 
 Lemma is_inhab_is_prop (X : Type) : is_prop ( is_inhab X ).
   intro.
@@ -36,11 +54,7 @@ Defined.
 Fixpoint n_connected ( n : nat) : Type -> Type :=
  match n with
  | O => fun X => is_inhab X 
- | S m => fun X => is_inhab X * forall x y : X, (n_connected m ( x == y )) end.
-
-(** The definition above proposes 0-connected for inhabited,
-1-connected for inhabited path-connected, 2-connected for path-simply-path-connected
-spaces, etc. I suppose every space is (-1)-connected? *)
+ | S m => fun X => is_inhab X * forall x y : X, n_connected m ( x == y ) end.
 
 Definition component { X : Type } : X -> Type :=
  fun x => { y : X & is_inhab (x == y) }.
